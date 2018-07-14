@@ -8,6 +8,7 @@
     </CustomSourceDirectories>
     <MainSourceDirectory>$(ProjectDir)</MainSourceDirectory>
     <EmbeddedProfileFile>stm32.xml</EmbeddedProfileFile>
+    <ExcludeToolDirsFromMakeFiles>false</ExcludeToolDirsFromMakeFiles>
   </Project>
   <Build xsi:type="com.visualgdb.build.embedded">
     <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
@@ -54,7 +55,6 @@
         <ThreadInfoSupported>false</ThreadInfoSupported>
         <PendingBreakpointsSupported>false</PendingBreakpointsSupported>
         <SupportTargetCommand>false</SupportTargetCommand>
-        <ReliableBreakpointNotifications>false</ReliableBreakpointNotifications>
       </Features>
       <DisableDisassembly>false</DisableDisassembly>
       <ExamineMemoryWithXCommand>false</ExamineMemoryWithXCommand>
@@ -125,8 +125,6 @@
     <SemihostingSupport>Auto</SemihostingSupport>
     <StepIntoEntryPoint>false</StepIntoEntryPoint>
     <ReloadFirmwareOnReset>false</ReloadFirmwareOnReset>
-    <ValidateEndOfStackAddress>true</ValidateEndOfStackAddress>
-    <StopAtEntryPoint>false</StopAtEntryPoint>
   </Debug>
   <CustomBuild>
     <PreBuildActions />
@@ -137,19 +135,22 @@
   <CustomDebug>
     <PreDebugActions />
     <PostDebugActions />
-    <DebugStopActions />
     <BreakMode>Default</BreakMode>
   </CustomDebug>
   <CustomShortcuts>
     <Shortcuts />
     <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
   </CustomShortcuts>
-  <UserDefinedVariables />
-  <ImportedPropertySheets />
+  <UserDefinedVariables>
+    <BuildVariable>
+      <Label />
+      <Description />
+      <Value>D:\3rd\SysGCC\arm-eabi</Value>
+      <Name>TOOLCHAIN_ROOT</Name>
+      <PromoteToEnvironment>false</PromoteToEnvironment>
+    </BuildVariable>
+  </UserDefinedVariables>
   <CodeSense>
     <Enabled>Unknown</Enabled>
-    <ExtraSettings>
-      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
-    </ExtraSettings>
   </CodeSense>
 </VisualGDBProjectSettings2>
