@@ -1,0 +1,7 @@
+Debug/
+Release/
+VisualGDBCache/
+obj/
+*sdf
+*.suo
+CodeDB/
