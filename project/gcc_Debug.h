@@ -296,6 +296,9 @@
 #ifndef __UACCUM_MAX__
 #define __UACCUM_MAX__ 0XFFFFFFFFP-16UK
 #endif
+#ifndef HSE_VALUE
+#define HSE_VALUE 8000000
+#endif
 #ifndef __DECIMAL_DIG__
 #define __DECIMAL_DIG__ 17
 #endif
@@ -1081,10 +1084,10 @@
 
 // --- Include directories begin --- //
 //.
-//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/STM32F4xx_StdPeriph_Driver/inc
-//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Device/ST/STM32F4xx/Include
-//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Include
-//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/RTOS/Template
+//D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/STM32F4xx_StdPeriph_Driver/inc
+//D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Device/ST/STM32F4xx/Include
+//D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Include
+//D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/RTOS/Template
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/arm-eabi/thumb/cortex_m4
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/backward

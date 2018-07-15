@@ -4,7 +4,7 @@
 #Use VisualGDB Project Properties dialog or modify Makefile or per-configuration .mak files instead.
 
 #VisualGDB provides BSP_ROOT and TOOLCHAIN_ROOT via environment when running Make. The line below will only be active if GNU Make is started manually.
-BSP_ROOT ?= C:/Users/LIAO/Desktop/f4motor/project/BSP
+BSP_ROOT ?= D:/work/f4motor/software/f4motor/project/BSP
 TOOLCHAIN_ROOT ?= D:/3rd/SysGCC/arm-eabi
 
 #Embedded toolchain
@@ -26,6 +26,6 @@ LINUX_PACKAGES +=
 CFLAGS += 
 CXXFLAGS += 
 ASFLAGS += -mfpu=fpv4-sp-d16
-LDFLAGS += 
+LDFLAGS += -TD:/work/f4motor/software/f4motor/project/BSP/STM32F405RG_flash.lds
 COMMONFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
 

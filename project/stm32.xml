@@ -33,7 +33,7 @@
       </AdditionalLibraries>
       <CFLAGS />
       <CXXFLAGS />
-      <LDFLAGS />
+      <LDFLAGS>-TD:/work/f4motor/software/f4motor/project/BSP/STM32F405RG_flash.lds</LDFLAGS>
       <ASFLAGS>-mfpu=fpv4-sp-d16</ASFLAGS>
       <COMMONFLAGS>-mcpu=cortex-m4 -mthumb -mfloat-abi=soft</COMMONFLAGS>
       <EnableLinkerGroups>true</EnableLinkerGroups>

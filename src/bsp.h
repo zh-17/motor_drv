@@ -40,7 +40,7 @@ typedef char encoder_t;
 
 #define PWM_FREQUENCY	16000
 #define PWM_DEADTIME_NS	600
-#define SYS_FREQUENCY	72000000
+#define SYS_FREQUENCY	SystemCoreClock
 
 /* the ia, ib feedback dead in A*/
 #define driver_fbk_idead(ptr)	F16(0.1)

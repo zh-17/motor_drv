@@ -150,6 +150,13 @@
       <Name>TOOLCHAIN_ROOT</Name>
       <PromoteToEnvironment>false</PromoteToEnvironment>
     </BuildVariable>
+    <BuildVariable>
+      <Label />
+      <Description />
+      <Value>D:\Program Files (x86)\SEGGER\JLink_V510l</Value>
+      <Name>JLINK_DIR</Name>
+      <PromoteToEnvironment>false</PromoteToEnvironment>
+    </BuildVariable>
   </UserDefinedVariables>
   <CodeSense>
     <Enabled>False</Enabled>
