@@ -1645,9 +1645,10 @@ void board_init()
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 		pwm_tim1_init();
+		pwm_io_init();
+
 		driver_enable(0);
 		while (1);
-		pwm_io_init();
 // 
 // 		RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div1);
 // 		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ADC12, ENABLE);
