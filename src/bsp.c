@@ -73,6 +73,14 @@ void driver_disable(void*p)
 { 
 	GPIOD->BSRRL = GPIO_Pin_2; 
 } 
+void driver_ledon(void* p)
+{
+	GPIOB->BSRRL = GPIO_Pin_9;
+}
+void driver_ledoff(void* p)
+{
+	GPIOB->BSRRH = GPIO_Pin_9;
+}
 static void pwm_io_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -83,11 +91,15 @@ static void pwm_io_init()
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 	driver_disable(0);
 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
 //	TO DO, we implement the OC by query
 // 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource4);
 // 
@@ -670,7 +682,7 @@ int32_t encoder_ppr(encoder_t encoder)
 }
 
 /**********************ADC*************************/
-#define ADC_BUFF_LEN	8
+#define ADC_BUFF_LEN	1
 struct adc_dma_t {
 	int16_t ia;
 	int16_t ib;
@@ -690,102 +702,93 @@ uint32_t  adc_cr, adc_cndtr, adc_cpar, adc_cmar;
 */
 static void adc_init(void)
 {
-	/* Configure PA.03 and PA.04 (ADC Channel4 and Channel5) as analog input */
-	/* Configure PC.00 and PC.01 (ADC Channel6 and Channel7) as analog input */
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+	GPIO_InitTypeDef  GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(GPIOA, &GPIO_InitStructure);  
 
-	ADC_InitTypeDef	ADC_InitStructure;
-	ADC_StructInit(&ADC_InitStructure);
-	
-	/* ##DMA2_0 CH1 for ADC1 */
+
+	DMA_InitTypeDef DMA_InitStructure;
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+
 	DMA_DeInit(DMA2_Stream0);
-	DMA_InitTypeDef ADC_DMA;
-	ADC_DMA.DMA_Channel = DMA_Channel_0;
-	ADC_DMA.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-	ADC_DMA.DMA_Memory0BaseAddr = (uint32_t)adc_dma;
-	ADC_DMA.DMA_DIR = DMA_DIR_PeripheralToMemory;
-	ADC_DMA.DMA_BufferSize = ADC_BUFF_LEN;
-	ADC_DMA.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	ADC_DMA.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	ADC_DMA.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-	ADC_DMA.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
-	ADC_DMA.DMA_Mode = DMA_Mode_Normal;
-	ADC_DMA.DMA_Priority = DMA_Priority_VeryHigh;
-	ADC_DMA.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-	ADC_DMA.DMA_PeripheralBurst = DMA_MemoryBurst_Single;
-	DMA_Init(DMA2_Stream0, &ADC_DMA);
-
-	adc_cr = DMA2_Stream0->CR;
-	adc_cndtr = DMA2_Stream0->NDTR;
-	adc_cpar = DMA2_Stream0->PAR;
-	adc_cmar = DMA2_Stream0->FCR;
-
+	DMA_StructInit(&DMA_InitStructure);
+	DMA_InitStructure.DMA_Channel = DMA_Channel_0;                   
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)0x40012308; 
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)adc_dma;   
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;       
+	DMA_InitStructure.DMA_BufferSize = ADC_BUFF_LEN * 2;                     
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;        
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; 
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;  
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;       
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High; 
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	DMA_Init(DMA2_Stream0, &DMA_InitStructure);
 	DMA_Cmd(DMA2_Stream0, ENABLE);
-#if 0
+
 	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream0_IRQn;     
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; 
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  
 	NVIC_Init(&NVIC_InitStructure);
-	DMA_ITConfig(DMA1_Channel1, DMA_IT_TC, ENABLE); //interrupt
-	DMA_Cmd(DMA1_Channel1, ENABLE);
-#endif
+	DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
+
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_ADC2 | RCC_APB2Periph_ADC3, ENABLE);
+
+	ADC_DeInit();
 	ADC_CommonInitTypeDef ADC_CommonInitStructure;
 	ADC_CommonInitStructure.ADC_Mode = ADC_DualMode_RegSimult;
-	ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div8;
-	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_1;
-	//ADC_CommonInitStructure.ADC_DMAMode = ADC_DMAMode_OneShot;
-	ADC_CommonInitStructure.ADC_TwoSamplingDelay = 0;
+	ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_1; 
+	ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div4;
 	ADC_CommonInit(&ADC_CommonInitStructure);
 
-	ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+	ADC_InitTypeDef       ADC_InitStructure;
 	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC2; //################
+	ADC_InitStructure.ADC_ScanConvMode = DISABLE;    
+	ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
 	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-// 	ADC_InitStructure.ADC_OverrunMode = ADC_OverrunMode_Disable;
-// 	ADC_InitStructure.ADC_AutoInjMode = ADC_AutoInjec_Disable;
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; 
 	ADC_InitStructure.ADC_NbrOfConversion = ADC_BUFF_LEN;
-	ADC_Init(ADC1, &ADC_InitStructure);
-//	ADC_RegularChannelSequencerLengthConfig(ADC1, ADC_BUFF_LEN);
-	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_RegularChannelConfig(ADC1, ADC_Channel_8, i + 1, ADC_SampleTime_15Cycles);
-	
-	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-	ADC_Init(ADC2, &ADC_InitStructure); 
-//	ADC_RegularChannelSequencerLengthConfig(ADC2, ADC_BUFF_LEN);
-	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_RegularChannelConfig(ADC2, ADC_Channel_6, i + 1, ADC_SampleTime_15Cycles);
 
-//	ADC_DMAConfig(ADC1, ADC_DMAMode_OneShot);
+	ADC_Init(ADC1, &ADC_InitStructure);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_15Cycles);
+
+	ADC_Init(ADC2, &ADC_InitStructure);
+	ADC_RegularChannelConfig(ADC2, ADC_Channel_3, 1, ADC_SampleTime_15Cycles);
+
+
+	/* Enable ADC1 DMA */
 	ADC_DMACmd(ADC1, ENABLE);
 
+
+	/* Enable DMA request after last transfer (Multi-ADC mode)  */
+	ADC_MultiModeDMARequestAfterLastTransferCmd(ENABLE);
+
 	ADC_Cmd(ADC1, ENABLE);
-	ADC_Cmd(ADC2, ENABLE);
- 
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = ADC_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
- 
-	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE); //interrupt
-	ADC_SoftwareStartConv(ADC1);
+	ADC_Cmd(ADC2, ENABLE);  
+	//ADC_SoftwareStartConv(ADC1);
 }
 
-void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
+void DMA2_Stream0_IRQHandler(void)  //max: 1742 clock about 24.2us
 {
-#if 0
+	driver_ledon(0);
+	if (DMA_GetITStatus(DMA2_Stream0, DMA_IT_TCIF0) != RESET) {
+		DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0 | DMA_IT_HTIF0);
+	}
 	//ADC_StartConversion(ADC1);
-	if (ADC_GetITStatus(ADC1, ADC_IT_EOS) == SET)
+	if (ADC_GetITStatus(ADC1, ADC_IT_EOC) == SET)
 	{
+#if 0
 		//ADC_ClearITPendingBit(ADC1, ADC_IT_EOS);
 		ADC1->ISR = (uint32_t)ADC_IT_EOS;
 		static uint8_t adc_offset_cnt = 0;
@@ -836,8 +839,10 @@ void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 		DMA1_Channel1->CCR |= DMA_CCR_EN;
 		//ADC_StartConversion(ADC1);
 		ADC1->CR |= ADC_CR_ADSTART;
-	}
 #endif
+	}
+
+	driver_ledoff(0);
 }
 
 int16_t driver_ia(void* self)
@@ -1631,7 +1636,9 @@ void board_init()
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2D, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+
 	//uart4_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 	//uart1_init();
@@ -1647,12 +1654,12 @@ void board_init()
 		pwm_tim1_init();
 		pwm_io_init();
 
+		adc_init();
+
 		driver_enable(0);
 		while (1);
 // 
-// 		RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div1);
-// 		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ADC12, ENABLE);
-		adc_init();
+
 
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
 		qep_spd_tim8_init();
