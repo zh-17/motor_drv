@@ -242,6 +242,9 @@
 #ifndef __STDC_HOSTED__
 #define __STDC_HOSTED__ 1
 #endif
+#ifndef FIXMATH_NO_ROUNDING
+#define FIXMATH_NO_ROUNDING 1
+#endif
 #ifndef __LDBL_HAS_INFINITY__
 #define __LDBL_HAS_INFINITY__ 1
 #endif
@@ -307,6 +310,9 @@
 #endif
 #ifndef __ULFRACT_MIN__
 #define __ULFRACT_MIN__ 0.0ULR
+#endif
+#ifndef __ARM_PCS_VFP
+#define __ARM_PCS_VFP 1
 #endif
 #ifndef __LDBL_HAS_QUIET_NAN__
 #define __LDBL_HAS_QUIET_NAN__ 1
@@ -384,9 +390,6 @@
 #ifndef __INT_LEAST32_MAX__
 #define __INT_LEAST32_MAX__ 2147483647L
 #endif
-#ifndef __ARM_PCS
-#define __ARM_PCS 1
-#endif
 #ifndef __DEC32_MIN__
 #define __DEC32_MIN__ 1E-95DF
 #endif
@@ -453,9 +456,6 @@
 #ifndef __UTA_FBIT__
 #define __UTA_FBIT__ 64
 #endif
-#ifndef __SOFTFP__
-#define __SOFTFP__ 1
-#endif
 #ifndef __FLT_MIN_EXP__
 #define __FLT_MIN_EXP__ (-125)
 #endif
@@ -470,6 +470,9 @@
 #endif
 #ifndef __INT_FAST64_TYPE__
 #define __INT_FAST64_TYPE__ long long int
+#endif
+#ifndef __FP_FAST_FMAF
+#define __FP_FAST_FMAF 1
 #endif
 #ifndef __DBL_MIN__
 #define __DBL_MIN__ double(2.2250738585072014e-308L)
@@ -524,6 +527,9 @@
 #endif
 #ifndef __UTQ_FBIT__
 #define __UTQ_FBIT__ 128
+#endif
+#ifndef MATH_FIX16
+#define MATH_FIX16 1
 #endif
 #ifndef __FLT_MANT_DIG__
 #define __FLT_MANT_DIG__ 24
@@ -936,6 +942,9 @@
 #ifndef __FLT_DENORM_MIN__
 #define __FLT_DENORM_MIN__ 1.4012984643248171e-45F
 #endif
+#ifndef FIXMATH_NO_OVERFLOW
+#define FIXMATH_NO_OVERFLOW 1
+#endif
 #ifndef __LLFRACT_IBIT__
 #define __LLFRACT_IBIT__ 0
 #endif
@@ -1089,7 +1098,7 @@
 //D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Include
 //D:/work/f4motor/software/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/RTOS/Template
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2
-//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/arm-eabi/thumb/cortex_m4
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/arm-eabi/thumb/fpu/cortex_m4
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/backward
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include
 //d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include-fixed
@@ -1102,8 +1111,8 @@
 
 
 // --- Library directories begin --- //
-//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/thumb/cortex_m4/
-//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/thumb/cortex_m4/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/thumb/fpu/cortex_m4/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/thumb/fpu/cortex_m4/
 //d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/
 //d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/
 //d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/

@@ -5,7 +5,7 @@
 BINARYDIR := Debug
 
 #Additional flags
-PREPROCESSOR_MACROS := DEBUG=1 HSE_VALUE=8000000
+PREPROCESSOR_MACROS := DEBUG=1 HSE_VALUE=8000000 MATH_FIX16 FIXMATH_NO_OVERFLOW FIXMATH_NO_ROUNDING
 INCLUDE_DIRS := 
 LIBRARY_DIRS := 
 LIBRARY_NAMES := 
@@ -13,7 +13,7 @@ ADDITIONAL_LINKER_INPUTS :=
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
 
-CFLAGS := -ggdb -ffunction-sections -O0 -std=c11
+CFLAGS := -ggdb -ffunction-sections -O2 -std=c11
 CXXFLAGS := -ggdb -ffunction-sections -fno-exceptions -fno-rtti -O0
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections

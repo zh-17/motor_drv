@@ -552,7 +552,7 @@ void rs485_get_abs_data()
 		RS_485_WR; 
 		restart_usart1();
 		USART1->DR = DATA_3;
-		for (int i = 0; i < 36; ++i)
+		for (int i = 0; i < 80; ++i)
 			__asm("nop");
 		uint32_t clk = GET_CORE_CLK();
 		abs_encoder.T += clk * ( NS_PER_SEC / 1000000) / (SYS_FREQUENCY / 1000000);
@@ -741,21 +741,21 @@ static void adc_init(void)
 	ADC_InitStructure.ADC_NbrOfConversion = sizeof(adc_dma) / 4;
 
 	ADC_Init(ADC1, &ADC_InitStructure);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_15Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_28Cycles);
 
 	ADC_Init(ADC2, &ADC_InitStructure);
-	ADC_RegularChannelConfig(ADC2, ADC_Channel_12, 1, ADC_SampleTime_15Cycles);
+	ADC_RegularChannelConfig(ADC2, ADC_Channel_12, 1, ADC_SampleTime_28Cycles);
 
 
 	ADC_InjectedSequencerLengthConfig(ADC1, ADC_BUFF_LEN);
 	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, i + 1, ADC_SampleTime_15Cycles);
+		ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, i + 1, ADC_SampleTime_28Cycles);
 	ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_T1_TRGO);
 	ADC_ExternalTrigInjectedConvEdgeConfig(ADC1, ADC_ExternalTrigInjecConvEdge_Rising);
 
 	ADC_InjectedSequencerLengthConfig(ADC2, ADC_BUFF_LEN);
 	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_InjectedChannelConfig(ADC2, ADC_Channel_2, i + 1, ADC_SampleTime_15Cycles);
+		ADC_InjectedChannelConfig(ADC2, ADC_Channel_2, i + 1, ADC_SampleTime_28Cycles);
 	ADC_ExternalTrigInjectedConvConfig(ADC2, ADC_ExternalTrigInjecConv_T1_TRGO);
 	ADC_ExternalTrigInjectedConvEdgeConfig(ADC2, ADC_ExternalTrigInjecConvEdge_Rising);
 
@@ -781,10 +781,9 @@ static void adc_init(void)
 }
 void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 {
-	driver_ledon(0);
-
 	if (ADC_GetITStatus(ADC1, ADC_IT_JEOC) == SET)
 	{
+		driver_ledon(0);
 		ADC_ClearITPendingBit(ADC1, ADC_IT_JEOC);
 
 		uint16_t adc1[ADC_BUFF_LEN], adc2[ADC_BUFF_LEN];
@@ -833,9 +832,10 @@ void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 			ib_A = - sum2 * (3300 * 1000 / 4096 / 55 / ADC_BUFF_LEN); /* 3.3 50A, 4096, A = AD * 1000 * 300 / 4096 / XXX , XXX for mV/A*/
 			board_update();
 		}
+
+		driver_ledoff(0);
 	}
 
-	driver_ledoff(0);
 }
 
 int16_t driver_ia(void* self)
@@ -1204,9 +1204,9 @@ void board_load_parameter()
 	motor.parameter.electric_offset = 19586;
 	motor.parameter.invert = 0;
 	motor.parameter.poles = 4;
-	motor.parameter.inductance = 0.999363;
-	motor.parameter.resistance = 1.139802;
-	motor.parameter.bandwith = 1000;
+	motor.parameter.inductance = F16(0.999363);
+	motor.parameter.resistance = F16(1.139802);
+	motor.parameter.bandwith = F16(1000);
 // 
  	
 // 	motor.parameter.bandwith = p->pid.bandwith;

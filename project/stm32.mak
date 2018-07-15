@@ -27,5 +27,5 @@ CFLAGS +=
 CXXFLAGS += 
 ASFLAGS += -mfpu=fpv4-sp-d16
 LDFLAGS += -TD:/work/f4motor/software/f4motor/project/BSP/STM32F405RG_flash.lds
-COMMONFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
+COMMONFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard
 

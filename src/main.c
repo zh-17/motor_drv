@@ -1,6 +1,7 @@
 #include "bsp.h"
 #include "control/motor.h"
 #include "stdio.h"
+/* for fix math add macro MATH_FIX16 FIXMATH_NO_OVERFLOW FIXMATH_NO_ROUNDING */
 
 motor_t motor;
 #define BSRR_VAL 0xC000
