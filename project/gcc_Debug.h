@@ -414,6 +414,9 @@
 #ifndef __UACCUM_MIN__
 #define __UACCUM_MIN__ 0.0UK
 #endif
+#ifndef flash_layout
+#define flash_layout 1
+#endif
 #ifndef __UACCUM_IBIT__
 #define __UACCUM_IBIT__ 16
 #endif
@@ -591,6 +594,9 @@
 #ifndef __UDQ_FBIT__
 #define __UDQ_FBIT__ 64
 #endif
+#ifndef DEBUG
+#define DEBUG 1
+#endif
 #ifndef __INT8_TYPE__
 #define __INT8_TYPE__ signed char
 #endif
@@ -680,6 +686,9 @@
 #endif
 #ifndef __DEC64_MAX__
 #define __DEC64_MAX__ 9.999999999999999E384DD
+#endif
+#ifndef STM32F40_41xxx
+#define STM32F40_41xxx 1
 #endif
 #ifndef __ARM_32BIT_STATE
 #define __ARM_32BIT_STATE 1
@@ -1068,38 +1077,32 @@
 #ifndef __ATOMIC_RELEASE
 #define __ATOMIC_RELEASE 3
 #endif
-#ifndef DEBUG
-#define DEBUG 1
-#endif
-#ifndef flash_layout
-#define flash_layout 
-#endif
-#ifndef STM32F40_41xxx
-#define STM32F40_41xxx 
-#endif
 #endif
 
 // --- Include directories begin --- //
 //.
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/arm-eabi/thumb/cortex_m4
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/backward
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include-fixed
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/sys-include
-//c:\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include
-//$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32/STM32F4xxxx/STM32F4xx_StdPeriph_Driver/inc
-//$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32/STM32F4xxxx/CMSIS_StdPeriph/Device/ST/STM32F4xx/Include
-//$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32/STM32F4xxxx/CMSIS_StdPeriph/Include
-//$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32/STM32F4xxxx/CMSIS_StdPeriph/RTOS/Template
+//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/STM32F4xx_StdPeriph_Driver/inc
+//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Device/ST/STM32F4xx/Include
+//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/Include
+//C:/Users/LIAO/Desktop/f4motor/project/BSP/STM32F4xxxx/CMSIS_StdPeriph/RTOS/Template
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/arm-eabi/thumb/cortex_m4
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include/c++/4.9.2/backward
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/include-fixed
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/sys-include
+//d:\3rd\sysgcc\arm-eabi\bin\../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/include
+//../src/math
+//../src/control/
+//../src
 // --- Include directories end --- //
 
 
 // --- Library directories begin --- //
-//c:/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/thumb/cortex_m4/
-//c:/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/thumb/cortex_m4/
-//c:/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/
-//c:/sysgcc/arm-eabi/bin/../lib/gcc/
-//c:/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/thumb/cortex_m4/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/thumb/cortex_m4/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/
+//d:/3rd/sysgcc/arm-eabi/bin/../lib/gcc/arm-eabi/4.9.2/../../../../arm-eabi/lib/
 // --- Library directories begin --- //
 

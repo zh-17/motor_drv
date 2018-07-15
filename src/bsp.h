@@ -49,8 +49,8 @@ typedef char encoder_t;
 #define driver_output_dead2(ptr)	F16((PWM_DEADTIME_NS * 2.0 / (1000000000 / PWM_FREQUENCY)))
 #define driver_frequency(ptr) (PWM_FREQUENCY * 2)
 
-#define driver_enable(ptr)	do{ driver_output(ptr, F16(0.5), F16(0.5), F16(0.5)); GPIOB->BRR = GPIO_Pin_12;  } while(0)
-#define driver_disable(ptr)	do{ GPIOB->BSRR = GPIO_Pin_12; } while(0)
+void driver_enable(void *ptr);
+void driver_disable(void *ptr);
 #define driver_output(ptr, a, b, c)	pwm_output(a, b, c)
 
 int16_t driver_ia(void* self);
@@ -73,14 +73,14 @@ void uart4_init(void);
 char pwm_fault();
 void pwm_output(fix16_t a, fix16_t b, fix16_t c);
 
-void usart_dma_send(DMA_Channel_TypeDef *dma_channel, uint8_t* buf, uint8_t size);
-void usart_receive_dma_reset(DMA_Channel_TypeDef * dma);
+//void usart_dma_send(DMA_Channel_TypeDef *dma_channel, uint8_t* buf, uint8_t size);
+//void usart_receive_dma_reset(DMA_Channel_TypeDef * dma);
 void flash_write_more_data(uint32_t startAddress, uint16_t *writeData, uint16_t countToWrite);
 void board_parameter_reset();
 void pos_latch_init(int16_t trigger_type);
 
 #include <stdio.h>
-#include "protocol.h"
+#include "control/protocol.h"
 #define printk printf
 
 extern uint8_t usart1_dma_rx_t[USART_BUFF_LEN];

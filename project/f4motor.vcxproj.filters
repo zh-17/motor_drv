@@ -29,9 +29,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LEDBlink.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="system_stm32f4xx.c">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -163,6 +160,48 @@
     </ClCompile>
     <ClCompile Include="BSP\STM32F4xxxx\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_wwdg.c">
       <Filter>Source files\Device-specific files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\control\motor.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\control\protocol.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\crc.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\hall.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fix16.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fix16_exp.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fix16_sqrt.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fix16_str.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fix16_trig.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\fract32.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\math\uint32.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\token.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bsp.c">
+      <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -350,6 +389,51 @@
     </ClInclude>
     <ClInclude Include="BSP\STM32F4xxxx\CMSIS_StdPeriph\RTOS\Template\cmsis_os.h">
       <Filter>Header files\Device-specific files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\bsp.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\control\motor.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\control\protocol.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\control\types.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\crc.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\encoder.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\hall.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\fix16.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\fix16.hpp">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\fix16_trig_sin_lut.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\fixmath.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\fract32.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\int64.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\math\uint32.h">
+      <Filter>Source files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\token.h">
+      <Filter>Source files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #include "fix16.h"
 #include <stdbool.h>
 #include <ctype.h>
-
+#ifdef MATH_FIX16
 static const uint32_t scales[8] = {
     /* 5 decimals is enough for full fix16_t precision */
     1, 10, 100, 1000, 10000, 100000, 100000, 100000
@@ -112,3 +112,4 @@ fix16_t fix16_from_str(const char *buf)
     return negative ? -value : value;
 }
 
+#endif

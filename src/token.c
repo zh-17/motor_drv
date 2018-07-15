@@ -23,10 +23,10 @@ void set_device_id(uint8_t id)
 	device_id = id;
 }
 
-uint8_t usart_receive_data(DMA_Channel_TypeDef * dma, uint8_t* receive_buffer, uint8_t* opPacket, int* token_now)
+uint8_t usart_receive_data(DMA_Stream_TypeDef * dma, uint8_t* receive_buffer, uint8_t* opPacket, int* token_now)
 {
 	static uint8_t data_len;
-	data_len = USART_BUFF_LEN - dma->CNDTR;
+	data_len = USART_BUFF_LEN - dma->NDTR;
 
 	if (data_len != 0)
 	{

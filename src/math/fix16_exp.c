@@ -6,7 +6,7 @@ static fix16_t _fix16_exp_cache_index[4096]  = { 0 };
 static fix16_t _fix16_exp_cache_value[4096]  = { 0 };
 #endif
 
-
+#ifdef MATH_FIX16
 
 fix16_t fix16_exp(fix16_t inValue) {
 	if(inValue == 0        ) return fix16_one;
@@ -196,3 +196,4 @@ fix16_t fix16_slog2(fix16_t x)
 		return fix16_minimum;
 	return retval;
 }
+#endif
