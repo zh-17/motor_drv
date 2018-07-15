@@ -65,16 +65,12 @@ void encoder_clear_offset(encoder_t encoder);
 int32_t encoder_ppr(encoder_t encoder);
 void qep_speed();
 int32_t encoder_speed(encoder_t encoder);
-void rs485_get_abs_data();
-void uart4_init(void);
 
-char pwm_fault();
 void pwm_output(fix16_t a, fix16_t b, fix16_t c);
 
 //void usart_dma_send(DMA_Channel_TypeDef *dma_channel, uint8_t* buf, uint8_t size);
 //void usart_receive_dma_reset(DMA_Channel_TypeDef * dma);
 void flash_write_more_data(uint32_t startAddress, uint16_t *writeData, uint16_t countToWrite);
-void board_parameter_reset();
 void pos_latch_init(int16_t trigger_type);
 
 #include <stdio.h>
@@ -84,6 +80,7 @@ void pos_latch_init(int16_t trigger_type);
 extern uint8_t usart1_dma_rx_t[USART_BUFF_LEN];
 extern uint8_t usart4_dma_rx_t[USART_BUFF_LEN];
 
+#define  DMA_CCR_EN  1
 #define  DWT_CR      *(volatile u32 *)0xE0001000
 #define  DWT_CYCCNT  *(volatile u32 *)0xE0001004
 #define  DEM_CR      *(volatile u32 *)0xE000EDFC

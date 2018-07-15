@@ -431,14 +431,13 @@ void hall_io_init()
 }
 
 /********************RS485*************************/
-/* PB10		UART3 TX
-   PB11		UART3 RX
-   PA5		RS485_DE
-   PB9		RS485_DE */
+/*	PB6		UART1 TX
+	PB7		UART1 RX
+	PC7		RS485_DE */
 
-uint8_t uart3_rx[11] = {1,2,3,4,5,6,7,8,9,10,0};
-#define RS_485_RD		GPIOB->BSRRL = GPIO_Pin_9
-#define RS_485_WR		GPIOB->BSRRL = GPIO_Pin_9
+uint8_t uart1_rx[11] = {1,2,3,4,5,6,7,8,9,10,0};
+#define RS_485_WR		GPIOC->BSRRL = GPIO_Pin_7
+#define RS_485_RD		GPIOC->BSRRH = GPIO_Pin_7
 static struct{
 	volatile int64_t position;
 	uint32_t last_pos;
@@ -448,37 +447,28 @@ static struct{
 	uint32_t last_spd_pos;
 	volatile int32_t T;
 } abs_encoder;
-void rs485_uart3_init()
+
+
+void rs485_uart1_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	//GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	//GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	//GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_USART1);
 
 	USART_InitTypeDef USART_InitStructure;
 	USART_InitStructure.USART_BaudRate = 2500000;
@@ -487,15 +477,15 @@ void rs485_uart3_init()
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART3->CR1 |= USART_CR1_OVER8;
-	USART_Init(USART3, &USART_InitStructure);
+	USART1->CR1 |= USART_CR1_OVER8;
+	USART_Init(USART1, &USART_InitStructure);
 
-	//USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
-	//USART_DMACmd(USART3, USART_DMAReq_Tx, ENABLE);
+//	USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
+//	USART_DMACmd(USART3, USART_DMAReq_Tx, ENABLE);
 
-// 	/* ##DMA1 CH2 for UART3 TX*/
+// 	/* ##DMA2 stream7 for UART1 TX*/
  	DMA_InitTypeDef DMA_InitStructure;
-// 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART3->TDR); 
+// 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART1->TDR); 
 // //	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)SRC_Const_Buffer;
 // 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 // 	DMA_InitStructure.DMA_BufferSize = 0;
@@ -509,10 +499,12 @@ void rs485_uart3_init()
 // 	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 // 	DMA_Cmd(DMA1_Channel2, DISABLE);
 
-	/* ##DMA1 CH3 for UART3 RX*/
-	DMA_DeInit(DMA1_Stream3);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART3->DR); 
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)uart3_rx;
+	/* ##DMA2 Stream2 for UART1 RX*/
+	DMA_DeInit(DMA2_Stream2);
+
+	DMA_InitStructure.DMA_Channel = DMA_Channel_4;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART1->DR); 
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)uart1_rx;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory; 
 	DMA_InitStructure.DMA_BufferSize = ABS_RETURN_LEN;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -521,24 +513,32 @@ void rs485_uart3_init()
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
-	//DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_Init(DMA1_Stream3, &DMA_InitStructure);
+ 
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
 
-	USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
-	DMA_Cmd(DMA1_Stream3, ENABLE);
-	USART_Cmd(USART3, ENABLE);
+	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+
+	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+ 
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+
+	DMA_Init(DMA2_Stream2, &DMA_InitStructure);
+
+	USART_DMACmd(USART1, USART_DMAReq_Rx, ENABLE);
+	DMA_Cmd(DMA2_Stream2, ENABLE);
+	USART_Cmd(USART1, ENABLE);
 }
-void rs485_uart3_request()
+void rs485_uart1_request()
 {
-	DMA1_Stream2->NDTR = 2;
-	//DMA1_Stream2->MAR = 2;
-	//DMA1_Stream2->CCR |= 1;
+	DMA2_Stream2->NDTR = 2;
+//	DMA1_Stream2->CMAR = 2;
+//	DMA1_Stream2->CCR |= 1;
 }
-void restart_usart3(void)
+void restart_usart1(void)
 {
-	//DMA1_Stream3->CCR &= (uint32_t)(~DMA_CCR_EN); /* Disable DMA Channel 1 to write in CNDTR*/
-	DMA1_Stream3->NDTR = ABS_RETURN_LEN; /* Reload the number of DMA tranfer to be performs on channel 1 */
-	//DMA1_Stream3->CCR |= DMA_CCR_EN; /* Enable again DMA Channel 1 */
+	DMA2_Stream2->CR &= (uint32_t)(~DMA_CCR_EN); /* Disable DMA Channel 1 to write in CNDTR*/
+	DMA2_Stream2->NDTR = ABS_RETURN_LEN; /* Reload the number of DMA tranfer to be performs on channel 1 */
+	DMA2_Stream2->CR |= (uint32_t)DMA_CCR_EN; /* Enable again DMA Channel 1 */
 }
 uint8_t error_cnt=0;
 
@@ -547,15 +547,11 @@ void rs485_get_abs_data()
 {
 	static uint32_t tick = 1;
 	tick++;
-	char pos = motor.encoder.motor | motor.encoder.pos;
 	if (tick % 4 == 0)
 	{
 		RS_485_WR; 
-		restart_usart3();
-		if ((pos & ABS_ENCODER) == ABS_ENCODER)
-			USART3->DR = DATA_3;
-		else if ((pos & PANASONIC_QEP_ENCODER) == PANASONIC_QEP_ENCODER)
-			USART3->DR = ID_A;
+		restart_usart1();
+		USART1->DR = DATA_3;
 		for (int i = 0; i < 36; ++i)
 			__asm("nop");
 		uint32_t clk = GET_CORE_CLK();
@@ -567,30 +563,12 @@ void rs485_get_abs_data()
 	{
 		uint32_t abs_pos;
 		uint32_t ppr;
-		if ((pos & ABS_ENCODER) && (uart3_rx[10] == crcFast(uart3_rx, 10)))
+		if (uart1_rx[10] == crcFast(uart1_rx, 10))
 		{
-			if (motor.encoder.resolution == RESOLUTION_23BITS)
-			{
-				abs_pos = ((((uint32_t)uart3_rx[7] & 0xff) << 31) + (((uint32_t)uart3_rx[6] & 0xff) << 23) + ((((uint32_t)uart3_rx[4] & 0xff) << 16) + (((uint32_t)uart3_rx[3] & 0xff) << 8) + ((uint32_t)uart3_rx[2] & 0xff)));
-				ppr = 8388608;
-			}
-			else if (motor.encoder.resolution == RESOLUTION_17BITS)
-			{
-				abs_pos = (((((uint32_t)uart3_rx[7] & 0xff) << 8) + (uart3_rx[6] & 0xff)) << 17) + (((((uint32_t)uart3_rx[4] & 0xff) << 16) + (((uint32_t)uart3_rx[3] & 0xff) << 8) + ((uint32_t)uart3_rx[2] & 0xff)));
-				ppr = 131072;
-			}
+			abs_pos = (((((uint32_t)uart1_rx[7] & 0xff) << 8) + (uart1_rx[6] & 0xff)) << 17) + (((((uint32_t)uart1_rx[4] & 0xff) << 16) + (((uint32_t)uart1_rx[3] & 0xff) << 8) + ((uint32_t)uart1_rx[2] & 0xff)));
+			ppr = 131072;
 		}
-		else if ((pos & PANASONIC_QEP_ENCODER) && (uart3_rx[8] == crcFast(uart3_rx, 8)))
-		{
-			if (motor.encoder.resolution == RESOLUTION_20BITS)
-			{
-				if ((uart3_rx[7] & 0x80) == 0)
-					abs_pos = ((uint32_t)0x0 << 24) + (((((uint32_t)uart3_rx[7] & 0xff) << 16) + (((uint32_t)uart3_rx[6] & 0xff) << 8) + ((uint32_t)uart3_rx[5] & 0xff)));
-				else
-					abs_pos = ((uint32_t)0xff << 24) + (((((uint32_t)uart3_rx[7] & 0xff) << 16) + (((uint32_t)uart3_rx[6] & 0xff) << 8) + ((uint32_t)uart3_rx[5] & 0xff)));
-				ppr = 1048576;
-			}
-		}
+		
 		int32_t delta_pos = abs_pos - abs_encoder.last_pos;
 
 		char valid = 0;
@@ -697,8 +675,7 @@ struct adc_dma_t {
  	uint16_t tmp;	
 } adc_dma[1];
 static int16_t IAB_OFFSET[2] = { 2048, 2120 };
-static int16_t ia_A;
-static int16_t ib_A;
+static int16_t ia_A, ib_A;
 static void adc_init(void)
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
@@ -800,7 +777,6 @@ static void adc_init(void)
 	ADC_Cmd(ADC2, ENABLE);  
 	//ADC_SoftwareStartConv(ADC1);
 }
-
 void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 {
 	driver_ledon(0);
@@ -853,7 +829,7 @@ void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 			}
 			ia_A = - sum1 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
 			ib_A = - sum2 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
-			//board_update();
+			board_update();
 		}
 	}
 
@@ -873,17 +849,6 @@ int16_t driver_ibus(void* self)
 	return 0;;// adc_dma->ibus;
 }
 
-
-/********************STATUS***********************/
-
-uint8_t driver_enabled(void)
-{
-	/*0 enable 1 disable*/
-	if (GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_12))
-		return 0;
-	else
-		return 1;
-}
 
 /***********************SPI to A8************************/
 /*PB3 PB4 PB5 for spi sck miso mosi*/
@@ -1120,69 +1085,7 @@ void  EXTI15_10_IRQHandler(void) // max: 499 clock about 7us
 }
 void parameter_sync(void)
 {
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
-// 
-// 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
-// 	spi3_init();
-// 	GPIO_InitTypeDef GPIO_InitStructure;
-// 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-// 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-// 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-// 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-// 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-// 
-// 	uint16_t receive_success = 0;
-// 	uint32_t time_out = 0;
-// 	while (1)
-// 	{
-// 		if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_12))
-// 		{
-// 			SPI3->CR1 &= (uint16_t)~((uint16_t)SPI_CR1_SPE);
-// 			SPI3->CR2 &= (uint16_t)~((uint16_t)(SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx));
-// 			motor_para_t* p = (motor_para_t*)command;
-// 			if ((p->crc == SPI3->RXCRCR) && (p->crc !=  0))
-// 			{
-// 				if (p->function == CONFIG_PARAMETER)
-// 				{
-// 					motor_para_t * pback = (motor_para_t*)feedback;
-// 
-// 					//parameters
-// 					motor.parameter.electric_offset = p->parameter.electric_offset;
-// 					motor.parameter.invert = p->parameter.invert;
-// 					motor.parameter.poles = p->parameter.poles;
-// 					motor.parameter.inductance = p->parameter.inductance / 1000000.0;
-// 					motor.parameter.resistance = p->parameter.resistance / 1000000.0;
-// 
-// 
-// 					motor.parameter.ppr = p->encoder.motor_ppr;
-// 					motor.parameter.bandwith = p->pid.bandwith;
-// 					//encoder
-// 					motor.encoder.init = p->encoder.encoder_init;
-// 					motor.encoder.pos = p->encoder.encoder_pos;
-// 					motor.encoder.spd = p->encoder.encoder_spd;
-// 					motor.encoder.motor = p->encoder.encoder_spd;
-// 
-// 					char pos = motor.encoder.motor | motor.encoder.pos;
-// 					if (pos & ABS_ENCODER)
-// 					{
-// 						if (p->encoder.motor_ppr == 131072 || p->encoder.position_ppr == 131072) //17bits
-// 							motor.encoder.resolution = RESOLUTION_17BITS;
-// 						if (p->encoder.motor_ppr == 8388608 || p->encoder.position_ppr == 8388608) //17bits
-// 							motor.encoder.resolution = RESOLUTION_23BITS;
-// 					}
-// 					else if (pos & PANASONIC_QEP_ENCODER)
-// 					{
-// 						if (p->encoder.motor_ppr == 1048576 || p->encoder.position_ppr == 1048576) //17bits
-// 							motor.encoder.resolution = RESOLUTION_20BITS;
-// 					}
-// 					if (p->pos_latch.pos_latch_function == 1)
-// 						pos_latch_init(p->pos_latch.pos_latch_type); //trigger rising for initial
-// 
-// 					board_parameter_reset();
-// 					receive_success = 1;
-// 					memcpy(pback, p, 126);
+
 // 				}
 // 				else if (p->function == CALIBRATION)
 // 				{
@@ -1260,337 +1163,9 @@ void parameter_sync(void)
 // 
 // 				}
 // 			}
-// 			else
-// 			{
-// 				SPI_I2S_ClearFlag(SPI3, SPI_FLAG_CRCERR);
-// 			}
-// 
-// 			DMA2_Channel1->CCR = 0;
-// 			DMA2->IFCR |= ((uint32_t)(DMA_ISR_GIF1 | DMA_ISR_TCIF1 | DMA_ISR_HTIF1 | DMA_ISR_TEIF1));
-// 
-// 			DMA2_Channel2->CCR = 0;
-// 			DMA2->IFCR |= ((uint32_t)(DMA_ISR_GIF2 | DMA_ISR_TCIF2 | DMA_ISR_HTIF2 | DMA_ISR_TEIF2));
-// 
-// 			//DMA_DeInit(DMA2_Channel2);
-// 			//SPI_I2S_DeInit(SPI3);
-// 			//RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, ENABLE);
-// 			RCC->APB1RSTR |= RCC_APB1Periph_SPI3;
-// 			/* Release SPI3 from reset state */
-// 			//	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, DISABLE);
-// 			RCC->APB1RSTR &= ~RCC_APB1Periph_SPI3;
-// 
-// 			SPI3->CR1 = spi3_cr1;
-// 			SPI3->CR2 = spi3_cr2;
-// 			SPI3->I2SCFGR &= (uint16_t)~((uint16_t)SPI_I2SCFGR_I2SMOD);
-// 			SPI3->CRCPR = 0x1021;
-// 
-// 			DMA2_Channel1->CCR = dma1_cr;
-// 			DMA2_Channel1->CNDTR = dma1_cndtr;
-// 			DMA2_Channel1->CPAR = dma1_cpar;
-// 			DMA2_Channel1->CMAR = dma1_cmar;
-// 			DMA2_Channel2->CCR = dma2_cr;
-// 			DMA2_Channel2->CNDTR = dma2_cndtr;
-// 			DMA2_Channel2->CPAR = dma2_cpar;
-// 			DMA2_Channel2->CMAR = dma2_cmar;
-// 
-// 
-// 			DMA2_Channel1->CCR |= DMA_CCR_EN;
-// 			DMA2_Channel2->CCR |= DMA_CCR_EN;
-// 			SPI3->CR1 |= SPI_CR1_SPE;
-// 			time_out = 0;
-// 		}
-// 		else if (receive_success == 1)
-// 		{
-// 			for (uint32_t i = 0; i < 100; i++); // about 10us
-// 			time_out++;
-// 			if (time_out > 10000)
-// 			{
-// 				dma1_cndtr = 8;
-// 				dma2_cndtr = 7;
-// 				break;
-// 			}
-// 		}
-// 		else if (receive_success == 2)
-// 		{
-// 			for (uint32_t i = 0; i < 300; i++); // about 10us
-// 			time_out++;
-// 			if (time_out > 10000)
-// 			{
-// 				irq_disable();
-// 				motor_disable(&motor);
-// 				for (uint16_t i = 0; i < 1000; i++);
-// 				__disable_fault_irq();
-// 				NVIC_SystemReset();
-// 				break;
-// 			}
-// 		}
-// 	}
-}
-
-/*********************pos latch**************************/
-void pos_latch_init(int16_t trigger_type)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure); //PB8 is the switch control for latch and TIM3CH3
-
-	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource0);
-
-	EXTI_InitTypeDef   EXTI_InitStructure;
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	if (trigger_type == TRIGGER_RISING)
-		EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	else if (trigger_type == TRIGGER_FALLING)
-		EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
-
-	NVIC_InitTypeDef   NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	EXTI_ClearITPendingBit(EXTI_Line0);
-}
-
-void  EXTI0_IRQHandler(void)
-{
-	if (EXTI_GetITStatus(EXTI_Line0) != RESET)
-	{
-		qep_update();
-		fbk_t * pFeedback = (fbk_t*)feedback;
-		pos_latched = 1;
-		if (motor.encoder.pos == ABZ_ENCODER)
-			pFeedback->position = qep.position;
-		else if (motor.encoder.pos == ABS_ENCODER)
-			pFeedback->position = abs_encoder.position;
-		EXTI_ClearITPendingBit(EXTI_Line0);
-	}
 }
 
 
-/***************************USART********************/
-uint8_t usart1_dma_rx_t[USART_BUFF_LEN];
-uint8_t usart4_dma_rx_t[USART_BUFF_LEN];
-DMA_InitTypeDef  DMA_InitStructure_CH4;
-DMA_InitTypeDef  DMA_InitStructure_CH5;
-USART_InitTypeDef USART_InitStructure;
-void uart1_init()
-{
-	/*##DMA1 CH4 for UART1 TX*/
-	/*##DMA1 CH5 for UART1 TX*/
-
-	USART_Cmd(USART1, DISABLE);
-	USART_DeInit(USART1);
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
-
-	DMA_InitTypeDef  DMA_InitStructure_CH4;
-	DMA_InitTypeDef  DMA_InitStructure_CH5;
-	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_USART1);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_USART1);
-
-
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-	USART_Init(USART1, &USART_InitStructure);
-
-// 	/* DMA_Channel5 ---- Rx */
-// 	DMA_DeInit(DMA1_Channel5);
-// 	DMA_InitStructure_CH5.DMA_PeripheralBaseAddr = (uint32_t)&USART1->RDR;
-// 	DMA_InitStructure_CH5.DMA_MemoryBaseAddr = (uint32_t)usart1_dma_rx_t;
-// 	DMA_InitStructure_CH5.DMA_DIR = DMA_DIR_PeripheralSRC;
-// 	DMA_InitStructure_CH5.DMA_BufferSize = USART_BUFF_LEN;
-// 	DMA_InitStructure_CH5.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 	DMA_InitStructure_CH5.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 	DMA_InitStructure_CH5.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA_InitStructure_CH5.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA_InitStructure_CH5.DMA_Mode = DMA_Mode_Normal;
-// 	DMA_InitStructure_CH5.DMA_Priority = DMA_Priority_VeryHigh;
-// 	DMA_InitStructure_CH5.DMA_M2M = DMA_M2M_Disable;
-// 	DMA_Init(DMA1_Channel5, &DMA_InitStructure_CH5);
-// 
-// 	/* DMA_Channel4 ---- Tx */
-// 	DMA_DeInit(DMA1_Channel4);
-// 	DMA_InitStructure_CH4.DMA_PeripheralBaseAddr = (uint32_t)&USART1->TDR;
-// 	DMA_InitStructure_CH4.DMA_DIR = DMA_DIR_PeripheralDST;
-// 	DMA_InitStructure_CH4.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 	DMA_InitStructure_CH4.DMA_BufferSize = 0;
-// 	DMA_InitStructure_CH4.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 	DMA_InitStructure_CH4.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA_InitStructure_CH4.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA_InitStructure_CH4.DMA_Mode = DMA_Mode_Normal;
-// 	DMA_InitStructure_CH4.DMA_Priority = DMA_Priority_VeryHigh;
-// 	DMA_InitStructure_CH4.DMA_M2M = DMA_M2M_Disable;
-// 
-// 	DMA_Init(DMA1_Channel4, &DMA_InitStructure_CH4);
-// 
-// 	USART_DMACmd(USART1, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
-// 
-// 	DMA_Cmd(DMA1_Channel5, ENABLE);
-// 
-// 	DMA_Cmd(DMA1_Channel4, ENABLE);
-// 
-// 	USART_Cmd(USART1, ENABLE);
-}
-
-void uart4_init(void)
-{
-// 	GPIO_InitTypeDef GPIO_InitStructure;
-// 	USART_InitTypeDef USART_InitStructure;
-// 	DMA_InitTypeDef  DMA2_InitStructure_CH3;
-// 	DMA_InitTypeDef  DMA2_InitStructure_CH5;
-// 
-// 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
-// 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-// 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-// 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-// 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-// 	GPIO_Init(GPIOC, &GPIO_InitStructure);
-// 
-// 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_5);
-// 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_5);
-// 
-// 	USART_InitStructure.USART_BaudRate = 115200;
-// 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-// 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-// 	USART_InitStructure.USART_Parity = USART_Parity_No;
-// 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-// 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-// 	USART_Init(UART4, &USART_InitStructure);
-// 
-// 	/* DMA2_Channel3 ---- Rx */
-// 	DMA_DeInit(DMA2_Channel3);
-// 	DMA2_InitStructure_CH3.DMA_PeripheralBaseAddr = (uint32_t)&UART4->RDR;
-// 	DMA2_InitStructure_CH3.DMA_MemoryBaseAddr = (uint32_t)(usart4_dma_rx_t);
-// 	DMA2_InitStructure_CH3.DMA_DIR = DMA_DIR_PeripheralSRC;
-// 	DMA2_InitStructure_CH3.DMA_BufferSize = USART_BUFF_LEN;
-// 	DMA2_InitStructure_CH3.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 	DMA2_InitStructure_CH3.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 	DMA2_InitStructure_CH3.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA2_InitStructure_CH3.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA2_InitStructure_CH3.DMA_Mode = DMA_Mode_Circular;
-// 	DMA2_InitStructure_CH3.DMA_Priority = DMA_Priority_High;
-// 	DMA2_InitStructure_CH3.DMA_M2M = DMA_M2M_Disable;
-// 	DMA_Init(DMA2_Channel3, &DMA2_InitStructure_CH3);
-// 
-// 	/* DMA2_Channel5 ---- Tx */
-// 	DMA_DeInit(DMA2_Channel5);
-// 	DMA2_InitStructure_CH5.DMA_PeripheralBaseAddr = (uint32_t)&UART4->TDR;
-// 	DMA2_InitStructure_CH5.DMA_DIR = DMA_DIR_PeripheralDST;
-// 	DMA2_InitStructure_CH5.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 	DMA2_InitStructure_CH5.DMA_BufferSize = 0;
-// 	DMA2_InitStructure_CH5.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 	DMA2_InitStructure_CH5.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA2_InitStructure_CH5.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
-// 	DMA2_InitStructure_CH5.DMA_Mode = DMA_Mode_Normal;
-// 	DMA2_InitStructure_CH5.DMA_Priority = DMA_Priority_High;
-// 	DMA2_InitStructure_CH5.DMA_M2M = DMA_M2M_Disable;
-// 	DMA_Init(DMA2_Channel5, &DMA2_InitStructure_CH5);
-// 
-// 
-// 	USART_DMACmd(UART4, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
-// 	DMA_Cmd(DMA2_Channel3, ENABLE);
-// 	DMA_Cmd(DMA2_Channel5, ENABLE);
-// 	USART_Cmd(UART4, ENABLE);
-}
-
-uint8_t dma_send_buf[2][USART_BUFF_LEN];
-void usart_dma_send(DMA_Stream_TypeDef *dma_channel, uint8_t* buf, uint8_t size)
-{
-// 	while ((dma_channel->CNDTR) != 0); //wait for the last transfer end
-// 
-// 	dma_channel->CCR &= (uint16_t)(~DMA_CCR_EN); // Disable
-// 
-// 	if (dma_channel == USART1_DMA_SEND){
-// 		memcpy(dma_send_buf[0], buf, size);
-// 		dma_channel->CMAR = (uint32_t)(dma_send_buf[0]);
-// 	}
-// 	else if (dma_channel == USART4_DMA_SEND){
-// 		memcpy(dma_send_buf[1], buf, size);
-// 		dma_channel->CMAR = (uint32_t)(dma_send_buf[1]);
-// 	}
-// 
-// 	dma_channel->CNDTR = size;
-// 	dma_channel->CCR |= DMA_CCR_EN; // Enable
-}
-
-void usart_receive_dma_reset(DMA_Stream_TypeDef * dma)
-{
-// 	dma->CCR &= (uint32_t)(~DMA_CCR_EN); /* Disable DMA Channel 1 to write in CNDTR*/
-// 	dma->CNDTR = USART_BUFF_LEN; /* Reload the number of DMA tranfer to be performs on channel 1 */
-// 	dma->CCR |= DMA_CCR_EN; /* Enable again DMA Channel 1 */
-}
-
-#if 0
-#ifdef __GNUC__
-
-uint8_t dma_send_buf1[256];
-int _write(int fd, char * str, int len)
-{
-// 	while ((DMA1_Channel4->CNDTR) != 0); //wait for the last transfer end
-// 	//irq_disable();
-// 	DMA1_Channel4->CCR &= (uint16_t)(~DMA_CCR_EN); // Disable
-// 	memcpy(dma_send_buf1, str, len);
-// 	DMA1_Channel4->CMAR = (uint32_t)dma_send_buf1;
-// 
-// 	DMA1_Channel4->CNDTR = len;
-// 	DMA1_Channel4->CCR |= DMA_CCR_EN; // Enable
-	//irq_enble();
-	return len;
-}
-int _read(int fd, char * str, int len)
-{
-// 	if (usart1_dma_rx_t[0] != 0xff)
-// 	{
-// 		((uint8_t*)str)[0] = usart1_dma_rx_t[0] - '0';
-// 		usart1_dma_rx_t[0] = 0xff;
-// 		return 1;
-// 	}
-	return 0;
-}
-
-int _isatty(int _FileHandle)
-{
-	return 1;
-}
-#endif
-#else
-int fputc(int ch, FILE *f)
-{
-	USART_SendData(USART1, (uint8_t)ch);
-
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
-	return ch;
-}
-#endif
 
 /**********************FLASH**************************/
 #define FLASH_SIZE 256 
@@ -1619,17 +1194,53 @@ void flash_write_more_data(uint32_t startAddress, uint16_t *writeData, uint16_t 
 }
 
 /**********************BOARD*************************/
-void board_parameter_reset()
+void board_load_parameter()
 {
-	fbk_t * pFeedback = (fbk_t*)feedback;
-	pFeedback->status.enabled = 0;
-	pFeedback->status.fault = 0;
-	pFeedback->status.index_found = 0;
-	pFeedback->status.pos_latched_value = 0;
-	pFeedback->status.saturation = 0;
-
-	pFeedback->error_code = 0;
-	pFeedback->position = 0;
+// 	motor_para_t * pback = (motor_para_t*)feedback;
+// 
+// 	//parameters
+// 	motor.parameter.electric_offset = p->parameter.electric_offset;
+// 	motor.parameter.invert = p->parameter.invert;
+// 	motor.parameter.poles = p->parameter.poles;
+// 	motor.parameter.inductance = p->parameter.inductance / 1000000.0;
+// 	motor.parameter.resistance = p->parameter.resistance / 1000000.0;
+// 
+// 
+// 	motor.parameter.ppr = p->encoder.motor_ppr;
+// 	motor.parameter.bandwith = p->pid.bandwith;
+// 	//encoder
+// 	motor.encoder.init = p->encoder.encoder_init;
+// 	motor.encoder.pos = p->encoder.encoder_pos;
+// 	motor.encoder.spd = p->encoder.encoder_spd;
+// 	motor.encoder.motor = p->encoder.encoder_spd;
+// 
+// 	char pos = motor.encoder.motor | motor.encoder.pos;
+// 	if (pos & ABS_ENCODER)
+// 	{
+// 		if (p->encoder.motor_ppr == 131072 || p->encoder.position_ppr == 131072) //17bits
+// 			motor.encoder.resolution = RESOLUTION_17BITS;
+// 		if (p->encoder.motor_ppr == 8388608 || p->encoder.position_ppr == 8388608) //17bits
+// 			motor.encoder.resolution = RESOLUTION_23BITS;
+// 	}
+// 	else if (pos & PANASONIC_QEP_ENCODER)
+// 	{
+// 		if (p->encoder.motor_ppr == 1048576 || p->encoder.position_ppr == 1048576) //17bits
+// 			motor.encoder.resolution = RESOLUTION_20BITS;
+// 	}
+// 	if (p->pos_latch.pos_latch_function == 1)
+// 		pos_latch_init(p->pos_latch.pos_latch_type); //trigger rising for initial
+// 
+// 	fbk_t * pFeedback = (fbk_t*)feedback;
+// 	pFeedback->status.enabled = 0;
+// 	pFeedback->status.fault = 0;
+// 	pFeedback->status.index_found = 0;
+// 	pFeedback->status.pos_latched_value = 0;
+// 	pFeedback->status.saturation = 0;
+// 
+// 	pFeedback->error_code = 0;
+// 	pFeedback->position = 0;
+// 
+// 	memcpy(pback, p, 126);
 }
 void board_init()
 {
@@ -1646,66 +1257,37 @@ void board_init()
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2D, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
-	//uart4_init();
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	pwm_tim1_init();
+	pwm_io_init();
+
+	adc_init();
+
+	driver_enable(0);
+
+// 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
+// 		qep_spd_tim8_init();
+// 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+// 		qep_tim3_init();
+
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	//uart1_init();
+	rs485_uart1_init();
 
-#ifndef DEBUG
-	parameter_sync();
-#endif // !DEBUG
 
-	if (!motor.calibrated)
+
+	if (SysTick_Config((SystemCoreClock) / 1000))
 	{
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-		pwm_tim1_init();
-		pwm_io_init();
-
-		adc_init();
-
-		driver_enable(0);
+		/* Capture error */
 		while (1);
-// 
-
-
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
-		qep_spd_tim8_init();
-
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-		rs485_uart3_init();
-
-		//RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-		//uart4_init();
-
-		/*RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
-		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
-		spi3_init();*/
-
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-		qep_tim3_init();
-
-		if (SysTick_Config((SystemCoreClock) / 1000))
-		{
-			/* Capture error */
-			while (1);
-		}
-		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-		NVIC_SetPriority(SysTick_IRQn, 0xff);
 	}
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	NVIC_SetPriority(SysTick_IRQn, 0xff);
 
-	sync_from_a8_init();
+	//sync_from_a8_init();
 }
 
-void power_on_init()
-{
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-// 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
-// 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_CRC, ENABLE);
-	spi3_init();
-	sync_from_a8_init();
-}
-void usart_token(motor_t* self);
 static void board_update()
 {
 	char pos = motor.encoder.motor | motor.encoder.pos;
