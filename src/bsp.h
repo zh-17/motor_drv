@@ -57,8 +57,6 @@ int16_t driver_ia(void* self);
 int16_t driver_ib(void* self);
 int16_t driver_ibus(void* self);
 
-int16_t driver_adc_ia_raw(void* self);
-int16_t driver_adc_ib_raw(void* self);
 
 int64_t encoder_position(encoder_t encoder);
 int64_t encoder_offset(encoder_t encoder);

@@ -63,6 +63,7 @@ PB1		TIM1_CH3N	PWM
 
 PD2		ENGATE
 PC4		OCFAULT
+PB9		LED DEBUG
 */
 void driver_enable(void* p)
 {
@@ -682,32 +683,32 @@ int32_t encoder_ppr(encoder_t encoder)
 }
 
 /**********************ADC*************************/
+/*	PA0	A0
+PA6 A6
+PC1 A11	VBUS3
+PC2 A12 TMP1
+PC3	A13 TMP2 NOT support
+PA2	A2	iv
+PA3	A3	iu
+*/
 #define ADC_BUFF_LEN	1
 struct adc_dma_t {
-	int16_t ia;
-	int16_t ib;
-// 	uint16_t temp; //25 + (332.5 - Vsense*0.18);
-// 	uint16_t none;
-// 	uint16_t vref;	//1.2V 1490
-// 	uint16_t ibus;
-} adc_dma[ADC_BUFF_LEN];
+ 	uint16_t vbus;;
+ 	uint16_t tmp;	
+} adc_dma[1];
 static int16_t IAB_OFFSET[2] = { 2048, 2120 };
 static int16_t ia_A;
 static int16_t ib_A;
-
-uint32_t  adc_cr, adc_cndtr, adc_cpar, adc_cmar;
-/*	PA3	ADC1_IN4	ibus
-	PA2	ADC1_IN2	iv
-	PA3	ADC1_IN3	iu
-*/
 static void adc_init(void)
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);  
+	GPIO_Init(GPIOA, &GPIO_InitStructure); 
 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	DMA_InitTypeDef DMA_InitStructure;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
@@ -718,7 +719,7 @@ static void adc_init(void)
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)0x40012308; 
 	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)adc_dma;   
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;       
-	DMA_InitStructure.DMA_BufferSize = ADC_BUFF_LEN * 2;                     
+	DMA_InitStructure.DMA_BufferSize = sizeof(adc_dma) / 2;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;        
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; 
@@ -732,13 +733,13 @@ static void adc_init(void)
 	DMA_Init(DMA2_Stream0, &DMA_InitStructure);
 	DMA_Cmd(DMA2_Stream0, ENABLE);
 
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream0_IRQn;     
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; 
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  
-	NVIC_Init(&NVIC_InitStructure);
-	DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
+// 	NVIC_InitTypeDef NVIC_InitStructure;
+// 	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream0_IRQn;     
+// 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; 
+// 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+// 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;  
+// 	NVIC_Init(&NVIC_InitStructure);
+// 	DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
 
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_ADC2 | RCC_APB2Periph_ADC3, ENABLE);
@@ -758,14 +759,35 @@ static void adc_init(void)
 	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
 	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right; 
-	ADC_InitStructure.ADC_NbrOfConversion = ADC_BUFF_LEN;
+	ADC_InitStructure.ADC_NbrOfConversion = sizeof(adc_dma) / 4;
 
 	ADC_Init(ADC1, &ADC_InitStructure);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_15Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_15Cycles);
 
 	ADC_Init(ADC2, &ADC_InitStructure);
-	ADC_RegularChannelConfig(ADC2, ADC_Channel_3, 1, ADC_SampleTime_15Cycles);
+	ADC_RegularChannelConfig(ADC2, ADC_Channel_12, 1, ADC_SampleTime_15Cycles);
 
+
+	ADC_InjectedSequencerLengthConfig(ADC1, ADC_BUFF_LEN);
+	for (int i = 0; i < ADC_BUFF_LEN; ++i)
+		ADC_InjectedChannelConfig(ADC1, ADC_Channel_2, i + 1, ADC_SampleTime_15Cycles);
+	ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_T1_TRGO);
+	ADC_ExternalTrigInjectedConvEdgeConfig(ADC1, ADC_ExternalTrigInjecConvEdge_Rising);
+
+	ADC_InjectedSequencerLengthConfig(ADC2, ADC_BUFF_LEN);
+	for (int i = 0; i < ADC_BUFF_LEN; ++i)
+		ADC_InjectedChannelConfig(ADC2, ADC_Channel_3, i + 1, ADC_SampleTime_15Cycles);
+	ADC_ExternalTrigInjectedConvConfig(ADC2, ADC_ExternalTrigInjecConv_T1_TRGO);
+	ADC_ExternalTrigInjectedConvEdgeConfig(ADC2, ADC_ExternalTrigInjecConvEdge_Rising);
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	NVIC_InitStructure.NVIC_IRQChannel = ADC_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	ADC_ITConfig(ADC1, ADC_IT_JEOC, ENABLE); //interrupt
 
 	/* Enable ADC1 DMA */
 	ADC_DMACmd(ADC1, ENABLE);
@@ -779,26 +801,40 @@ static void adc_init(void)
 	//ADC_SoftwareStartConv(ADC1);
 }
 
-void DMA2_Stream0_IRQHandler(void)  //max: 1742 clock about 24.2us
+void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 {
 	driver_ledon(0);
-	if (DMA_GetITStatus(DMA2_Stream0, DMA_IT_TCIF0) != RESET) {
-		DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0 | DMA_IT_HTIF0);
-	}
-	//ADC_StartConversion(ADC1);
-	if (ADC_GetITStatus(ADC1, ADC_IT_EOC) == SET)
+
+	if (ADC_GetITStatus(ADC1, ADC_IT_JEOC) == SET)
 	{
-#if 0
-		//ADC_ClearITPendingBit(ADC1, ADC_IT_EOS);
-		ADC1->ISR = (uint32_t)ADC_IT_EOS;
+		ADC_ClearITPendingBit(ADC1, ADC_IT_JEOC);
+
+		uint16_t adc1[ADC_BUFF_LEN], adc2[ADC_BUFF_LEN];
+
+#if ADC_BUFF_LEN >= 1
+		adc1[0] = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_1);
+		adc2[0] = ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1);
+#endif
+#if ADC_BUFF_LEN >= 2
+		adc1[1] = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_2);
+		adc2[1] = ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_2);
+#endif
+#if ADC_BUFF_LEN >= 3
+		adc1[2] = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_3);
+		adc2[2] = ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_3);
+#endif
+#if ADC_BUFF_LEN >= 4
+		adc1[3] = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_4);
+		adc2[3] = ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_4);
+#endif
 		static uint8_t adc_offset_cnt = 0;
 		if (adc_offset_cnt < 100)
 		{
 			static int32_t offset_sum1 = 0, offset_sum2 = 0;
 			adc_offset_cnt++;
 			for (int j = 0; j < ADC_BUFF_LEN; ++j) {
-				offset_sum1 += adc_dma[j].ia;
-				offset_sum2 += adc_dma[j].ib;
+				offset_sum1 += adc1[j];
+				offset_sum2 += adc2[j];
 			}
 			if (adc_offset_cnt == 100)
 			{
@@ -810,36 +846,15 @@ void DMA2_Stream0_IRQHandler(void)  //max: 1742 clock about 24.2us
 		else
 		{
 			int32_t sum1 = 0, sum2 = 0;
-			for (int j = 0; j < ADC_BUFF_LEN; ++j) {
-				sum1 += adc_dma[j].ia - IAB_OFFSET[0];
-				sum2 += adc_dma[j].ib - IAB_OFFSET[1];
+			for (int i = 0; i < ADC_BUFF_LEN; ++i)
+			{
+				sum1 += adc1[i] - IAB_OFFSET[0];
+				sum2 += adc2[i] - IAB_OFFSET[1];
 			}
-			// 		sum1 -= ADC_BUFF_LEN * ;
-			// 		sum2 -= ADC_BUFF_LEN * IAB_OFFSET[1];
-			ia_A = -sum1 * 3300 * 1000 / 4096 / 264 / ADC_BUFF_LEN;
-			ib_A = -sum2 * 3300 * 1000 / 4096 / 264 / ADC_BUFF_LEN;
-
-			//printk("%d %d \r\n", adc_dma[0].ia, adc_dma[0].ib);
-			board_update();
+			ia_A = - sum1 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
+			ib_A = - sum2 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
+			//board_update();
 		}
-		//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-		//DMA_Cmd(DMA1_Channel1, DISABLE);
-		
-		DMA1_Channel1->CCR &= (uint16_t)(~DMA_CCR_EN);
-
-		//DMA_DeInit(DMA1_Channel1);
-		DMA1_Channel1->CCR &= (uint16_t)(~DMA_CCR_EN);
-		DMA1->IFCR |= ((uint32_t)(DMA_ISR_GIF1 | DMA_ISR_TCIF1 | DMA_ISR_HTIF1 | DMA_ISR_TEIF1));
-		//DMA_Cmd(DMA1_Channel1, ENABLE);
-		DMA1_Channel1->CCR = adc_cr;
-		DMA1_Channel1->CNDTR = adc_cndtr;
-		DMA1_Channel1->CPAR = adc_cpar;
-		DMA1_Channel1->CMAR = adc_cmar;
-
-		DMA1_Channel1->CCR |= DMA_CCR_EN;
-		//ADC_StartConversion(ADC1);
-		ADC1->CR |= ADC_CR_ADSTART;
-#endif
 	}
 
 	driver_ledoff(0);
@@ -858,14 +873,6 @@ int16_t driver_ibus(void* self)
 	return 0;;// adc_dma->ibus;
 }
 
-int16_t driver_adc_ia_raw(void* self)
-{
-	return (adc_dma[0].ia + adc_dma[1].ia + adc_dma[2].ia + adc_dma[3].ia) >> 2;
-}
-int16_t driver_adc_ib_raw(void* self)
-{
-	return (adc_dma[0].ib + adc_dma[1].ib + adc_dma[2].ib + adc_dma[3].ib) >> 2;
-}
 
 /********************STATUS***********************/
 
