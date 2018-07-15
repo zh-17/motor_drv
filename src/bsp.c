@@ -667,7 +667,9 @@ PC1 A11	VBUS3
 PC2 A12 TMP1
 PC3	A13 TMP2 NOT support
 PA2	A2	iv
-PA3	A3	iu
+PA3	A3	iu CH1
+
+for phase current, flow to motor is positive.
 */
 #define ADC_BUFF_LEN	1
 struct adc_dma_t {
@@ -747,13 +749,13 @@ static void adc_init(void)
 
 	ADC_InjectedSequencerLengthConfig(ADC1, ADC_BUFF_LEN);
 	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_InjectedChannelConfig(ADC1, ADC_Channel_2, i + 1, ADC_SampleTime_15Cycles);
+		ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, i + 1, ADC_SampleTime_15Cycles);
 	ADC_ExternalTrigInjectedConvConfig(ADC1, ADC_ExternalTrigInjecConv_T1_TRGO);
 	ADC_ExternalTrigInjectedConvEdgeConfig(ADC1, ADC_ExternalTrigInjecConvEdge_Rising);
 
 	ADC_InjectedSequencerLengthConfig(ADC2, ADC_BUFF_LEN);
 	for (int i = 0; i < ADC_BUFF_LEN; ++i)
-		ADC_InjectedChannelConfig(ADC2, ADC_Channel_3, i + 1, ADC_SampleTime_15Cycles);
+		ADC_InjectedChannelConfig(ADC2, ADC_Channel_2, i + 1, ADC_SampleTime_15Cycles);
 	ADC_ExternalTrigInjectedConvConfig(ADC2, ADC_ExternalTrigInjecConv_T1_TRGO);
 	ADC_ExternalTrigInjectedConvEdgeConfig(ADC2, ADC_ExternalTrigInjecConvEdge_Rising);
 
@@ -827,8 +829,8 @@ void ADC_IRQHandler(void)  //max: 1742 clock about 24.2us
 				sum1 += adc1[i] - IAB_OFFSET[0];
 				sum2 += adc2[i] - IAB_OFFSET[1];
 			}
-			ia_A = - sum1 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
-			ib_A = - sum2 * (3300 * 1000 / 4096 / 66 / ADC_BUFF_LEN);
+			ia_A = - sum1 * (3300 * 1000 / 4096 / 55 / ADC_BUFF_LEN);
+			ib_A = - sum2 * (3300 * 1000 / 4096 / 55 / ADC_BUFF_LEN); /* 3.3 50A, 4096, A = AD * 1000 * 300 / 4096 / XXX , XXX for mV/A*/
 			board_update();
 		}
 	}
@@ -1199,20 +1201,22 @@ void board_load_parameter()
 // 	motor_para_t * pback = (motor_para_t*)feedback;
 // 
 // 	//parameters
-// 	motor.parameter.electric_offset = p->parameter.electric_offset;
-// 	motor.parameter.invert = p->parameter.invert;
-// 	motor.parameter.poles = p->parameter.poles;
-// 	motor.parameter.inductance = p->parameter.inductance / 1000000.0;
-// 	motor.parameter.resistance = p->parameter.resistance / 1000000.0;
+	motor.parameter.electric_offset = 19586;
+	motor.parameter.invert = 0;
+	motor.parameter.poles = 4;
+	motor.parameter.inductance = 0.999363;
+	motor.parameter.resistance = 1.139802;
+	motor.parameter.bandwith = 1000;
 // 
-// 
-// 	motor.parameter.ppr = p->encoder.motor_ppr;
+ 	
 // 	motor.parameter.bandwith = p->pid.bandwith;
-// 	//encoder
-// 	motor.encoder.init = p->encoder.encoder_init;
-// 	motor.encoder.pos = p->encoder.encoder_pos;
-// 	motor.encoder.spd = p->encoder.encoder_spd;
-// 	motor.encoder.motor = p->encoder.encoder_spd;
+	
+	motor.parameter.ppr = 1 << 17;
+ 	motor.encoder.init = ABS_ENCODER;
+	motor.encoder.pos = ABS_ENCODER;
+	motor.encoder.spd = ABS_ENCODER;
+	motor.encoder.motor = ABS_ENCODER;
+	motor_set_vbus(&motor, 25);
 // 
 // 	char pos = motor.encoder.motor | motor.encoder.pos;
 // 	if (pos & ABS_ENCODER)
@@ -1244,6 +1248,7 @@ void board_load_parameter()
 }
 void board_init()
 {
+	board_load_parameter();
 	/* software init crc table */
 	crcInit();
 

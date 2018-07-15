@@ -85,7 +85,6 @@ typedef struct motor
 		fix16_t		resistance; /* phase, ohm */
 		fix16_t		inductance; /* phase, mH */
 		fix16_t		bandwith;
-		uint8_t		configured;
 	}parameter;
 	uint16_t life_cnt;
 	int8_t calibrated;

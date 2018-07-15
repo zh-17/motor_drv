@@ -13,6 +13,8 @@ int main()
  	board_init();
 	motor_init(&motor);
 	printf("mcu start\r\n");
-//	pmsm_calibrate(&motor, 3000);
+	//pmsm_calibrate(&motor, 3000);
+	motor_enable(&motor);
+	motor_set_target(&motor, 500);
 	while (1);
 }
