@@ -20,7 +20,7 @@ extern "C" {
 	/* Uncomment to enable stack-checking */
 	/* #define RTOS_STACK_CHECKING */
 	/* Constants */
-#define NS_PER_SEC 1000000000u
+#define NS_PER_SEC 1000000000u  //表示每秒钟的纳秒数
 #define U64MAX					0xFFFFFFFFFFFFFFFFu
 #define TRUE                    1
 #define FALSE                   0

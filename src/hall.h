@@ -1,6 +1,7 @@
 #ifndef __HALL_H__
 #define __HALL_H__
 #include "encoder.h"
+// 它定义了一个结构体 hall_t 和一些与霍尔效应传感器（Hall sensors）相关的函数。霍尔效应传感器通常用于电机控制系统中，用于检测磁场的变化，从而确定电机轴的位置。
 typedef struct
 {
 	//encoder_t __encoder;

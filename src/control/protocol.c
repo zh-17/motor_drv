@@ -1,7 +1,7 @@
 #include "protocol.h"
 #include "motor.h"
 
-static cmd_t cmd;
+static cmd_t cmd; 
 static fbk_t fbk;
 
 void motor_feedback(motor_t * self)

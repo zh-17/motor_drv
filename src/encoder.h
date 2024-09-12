@@ -6,7 +6,7 @@
 #define 	DATA_0	0x02   	/* ABS0, ABS1, ABS2 */
 #define 	DATA_1 	0x8a 	/* ABM0, ABM1, ABM2 */
 #define 	DATA_2  0x92	/* 		 ENID		*/
-#define 	DATA_3  0x1a	/* ABS0, ABS1, ABS2, ENID, ABM0, ABM1, ABM2, ALMC */
+#define 	DATA_3  0x1a	/* ABS0, ABS1, ABS2, ENID, ABM0, ABM1, ABM2, ALMC */  //每位的含义
 #define  	DATA_6  0x32	/* Writing to EEPROM   */
 #define  	DATA_D  0xea	/* Readout from EEPROM */
 #define  	DATA_7  0xba	/* Reset   */

@@ -11,7 +11,9 @@
 #define FLASH_UPDATE  0x5A5A5A5A
 #define FLASH_UPDATE_COMPLETE 0xFFFFFFFF
 
+// pragma pack(1)：确保结构体成员按照1字节对齐，避免因编译器优化导致的内存对齐问题。
 #pragma pack(1)
+// cmd_t：命令结构体，包含控制字、扭矩、电压、PWM、保留字段和CRC校验码。
 typedef struct {
 	struct
 	{
@@ -29,8 +31,9 @@ typedef struct {
 #ifndef HW_CRC
 	uint16_t crc;
 #endif
-}cmd_t;
 
+}cmd_t;
+// fbk_t：反馈结构体，包含状态位字段、电流、扭矩、速度、位置、错误代码和CRC校验码
 typedef struct 
 {
 	struct
@@ -104,6 +107,7 @@ typedef struct{
 	uint16_t crc;
 }motor_para_t;
 
+// 固件更新结构体
 typedef struct{
 
 	uint16_t function; // 1: config motor parameters 2: update firmware

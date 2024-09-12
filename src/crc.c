@@ -16,46 +16,33 @@
 #include "crc.h"
 
 uint8_t crcTable[256] = {0};
+// 实现了CRC查找表的初始化。它通过对于所有可能的8位数据值（0到255）进行模2除法运算，并使用预定义的多项式生成CRC校验码，然后将这些校验码存储在crcTable数组中
 void crcInit(void)
 {
-    uint8_t  remainder;
-	int dividend, bit;
+    uint8_t  remainder;//余数
+	int dividend, bit;//被除数、位
 
-    /*
-     * Compute the remainder of each possible dividend.
-     */
     for (dividend = 0; dividend < 256; ++dividend)
     {
-        /*
-         * Start with the dividend followed by zeros.
-         */
+        // 被除数后跟零开始
         remainder = dividend << (WIDTH - 8);
-
-        /*
-         * Perform modulo-2 division, a bit at a time.
-         */
+        // 执行模2除法
         for (bit = 8; bit > 0; --bit)
         {
-            /*
-             * Try to divide the current data bit.
-             */			
+            // 如果余数最高位为1
             if (remainder & TOPBIT)
             {
-                remainder = (remainder << 1) ^ POLYNOMIAL;
+                remainder = (remainder << 1) ^ POLYNOMIAL;//左移一位并与多项式异或
             }
-            else
+            else//最高位为0
             {
                 remainder = (remainder << 1);
             }
         }
-
-        /*
-         * Store the result into the table.
-         */
         crcTable[dividend] = remainder;
     }
 
-}   /* crcInit() */
+}
 
 uint8_t crcFast(uint8_t const message[], int nBytes)
 {
@@ -69,14 +56,14 @@ uint8_t crcFast(uint8_t const message[], int nBytes)
      */
     for (byte = 0; byte < nBytes; ++byte)
     {
+        // 获取当前字节，与余数的最高位进行异或操作
         data = message[byte] ^ (remainder >> (WIDTH - 8));
+        // 使用查找表获取data的CRC值，并与余数左移8位进行异或操作，更新余数
         remainder = crcTable[data] ^ (remainder << 8);
     }
 
-    /*
-     * The final remainder is the CRC.
-     */
+
     return (remainder);
 
-}   /* crcFast() */
+}
 
